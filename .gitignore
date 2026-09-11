@@ -12,9 +12,9 @@ zephyr_app/stm32/curie*
 /zephyr/
 /bootloader/
 /modules/
+/tools/
 /build/
 /.west/
 /.venv/
 /.claude/
 /zephyr_git_vendor_squashed_backup/
-
