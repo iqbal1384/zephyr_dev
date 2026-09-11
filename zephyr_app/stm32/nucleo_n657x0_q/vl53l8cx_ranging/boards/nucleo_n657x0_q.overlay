@@ -1,0 +1,21 @@
+/* nucleo_n657x0_q overlay for VL53L8A1 shield using st_vl53l8cx sensor driver */
+
+&i2c1 {
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
+
+	vl53l8cx: vl53l8cx@29 {
+		compatible = "st,vl53l8cx";
+		reg = <0x29>;
+		pwr-en-gpios = <&gpiog 2 GPIO_ACTIVE_HIGH>;   /* Arduino D11 */
+		lpn-gpios    = <&gpioa 12 GPIO_ACTIVE_HIGH>;  /* Arduino A3 */
+		resolution = <64>;                           /* 64 for 8x8, 16 for 4x4 */
+		ranging-frequency = <10>;                     /* 10 Hz */
+	};
+};
+
+/* Disable SPI5 to free PG2 (Arduino D11 / PWR_EN = SPI5_MOSI) */
+&spi5 {
+	status = "disabled";
+};
+

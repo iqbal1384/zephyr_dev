@@ -1,0 +1,78 @@
+/*
+ * RS485 transceiver DE/RE control on PG12 (Arduino D7). RS485 data itself
+ * rides LPUART1 (PB6/PB7 = Arduino D1/D0), already enabled by the board's
+ * default devicetree - no pinctrl change needed here.
+ */
+/ {
+	chosen {
+		zephyr,code-partition = &slot0_partition;
+	};
+
+	rs485_ctrl: rs485_ctrl {
+		compatible = "gpio-leds";
+
+		rs485_de: rs485_de {
+			gpios = <&gpiog 12 GPIO_ACTIVE_HIGH>;
+			label = "RS485_DE_RE";
+		};
+	};
+
+	aliases {
+		watchdog0 = &iwdg;
+	};
+};
+
+&iwdg {
+	status = "okay";
+};
+
+/*
+ * The upstream board devicetree doesn't define a flash partition table.
+ * 1MB flash, 128KB erase sectors (stm32h723.dtsi) - every boundary below
+ * lands on a sector boundary. No scratch partition: MCUboot's default
+ * "swap using offset" mode doesn't need one (same as nucleo_g474re).
+ *
+ * storage gets 2 sectors (256K), not 1: settings_nvs.c's NVS backend
+ * refuses to mount on fewer than 2 sectors (nvs_mount() in
+ * subsys/kvss/nvs/nvs.c hard-errors "Configuration error - sector count"
+ * below that) - it needs at least one spare sector to garbage-collect into.
+ * A single 128K sector silently broke rs485_envelope_init() at boot (main()
+ * returned before ever reaching the LED loop).
+ *
+ * slot1 (image-1) has ONE MORE sector than slot0 (image-0), not the same
+ * count - required by swap-using-offset's app_max_size() (swap_offset.c):
+ * it reserves a trailer sector in slot0 but a trailer *and* a padding sector
+ * in slot1, so equal-sized slots make available_sec_sz compute to exactly
+ * 0, capping the max bootable image size at 0 regardless of image content.
+ * That's what actually caused "Image in the primary slot is not valid!"
+ * for every image tried, verified via CONFIG_MCUBOOT_UTIL_LOG_LEVEL_DBG's
+ * "TLV beyond image size" trace - not a signing or header problem at all.
+ */
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "mcuboot";
+			reg = <0x00000000 DT_SIZE_K(128)>;
+			read-only;
+		};
+
+		slot0_partition: partition@20000 {
+			label = "image-0";
+			reg = <0x00020000 DT_SIZE_K(256)>;
+		};
+
+		slot1_partition: partition@60000 {
+			label = "image-1";
+			reg = <0x00060000 DT_SIZE_K(384)>;
+		};
+
+		storage_partition: partition@c0000 {
+			label = "storage";
+			reg = <0x000c0000 DT_SIZE_K(256)>;
+		};
+	};
+};

@@ -1,0 +1,5 @@
+description: ST VL53L8CX / VL53L8A1 Time-of-Flight ranging sensor (SPI interface)
+
+compatible: "st,vl53l8a1-spi"
+
+include: spi-device.yaml

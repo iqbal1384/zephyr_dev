@@ -1,0 +1,17 @@
+/ {
+    motor_pins: motor_pins {
+        compatible = "gpio-leds";
+
+        m1_dir: m1_dir { gpios = <&gpiob 5 GPIO_ACTIVE_HIGH>; label = "M1_DIR"; };
+        m1_pwm: m1_pwm { gpios = <&gpiob 3 GPIO_ACTIVE_HIGH>; label = "M1_PWM"; };
+
+        m2_dir: m2_dir { gpios = <&gpioa 6 GPIO_ACTIVE_HIGH>; label = "M2_DIR"; };
+        m2_pwm: m2_pwm { gpios = <&gpioa 7 GPIO_ACTIVE_HIGH>; label = "M2_PWM"; };
+
+        m3_dir: m3_dir { gpios = <&gpioa 9 GPIO_ACTIVE_HIGH>; label = "M3_DIR"; };
+        m3_pwm: m3_pwm { gpios = <&gpiob 4 GPIO_ACTIVE_HIGH>; label = "M3_PWM"; };
+
+        m4_dir: m4_dir { gpios = <&gpioa 8 GPIO_ACTIVE_HIGH>; label = "M4_DIR"; };
+        m4_pwm: m4_pwm { gpios = <&gpiob 10 GPIO_ACTIVE_HIGH>; label = "M4_PWM"; };
+    };
+};

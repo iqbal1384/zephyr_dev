@@ -1,0 +1,46 @@
+/* boards/eink_gdep073e01.overlay for nucleo_l432kc
+ *
+ * Good Display GDEP073E01 (E Ink Spectra 6, SSD1677-family) 7.3" panel,
+ * wired through the DESPI-C73 adapter board (8-pin header P2: 3.3V, GND,
+ * SDI, SCK, CS, D/C, RES, BUSY - no MISO on this adapter).
+ * CS/DC/RES/BUSY are plain GPIOs, driven manually by the driver so pixel
+ * data can be streamed row-by-row without holding a full 192 KB
+ * framebuffer (the L432KC only has 64 KB of SRAM).
+ *
+ * Wiring (DESPI-C73 P2 -> Nucleo Arduino-Nano header):
+ *   3.3V -> 3V3
+ *   GND  -> GND
+ *   SDI  -> A6  (PA7, MOSI)
+ *   SCK  -> A4  (PA5)
+ *   CS   -> A3  (PA4)
+ *   D/C  -> D3  (PB0)
+ *   RES  -> D7  (PC14)
+ *   BUSY -> D8  (PC15)
+ */
+
+&spi1 {
+	pinctrl-0 = <&spi1_sck_pa5 &spi1_mosi_pa7>;
+	pinctrl-names = "default";
+	status = "okay";
+};
+
+&gpioa {
+	status = "okay";
+};
+
+&gpiob {
+	status = "okay";
+};
+
+&gpioc {
+	status = "okay";
+};
+
+/ {
+	zephyr_user: zephyr,user {
+		eink-cs-gpios   = <&gpioa 4  GPIO_ACTIVE_HIGH>; /* active LOW in hw, driven raw */
+		eink-dc-gpios   = <&gpiob 0  GPIO_ACTIVE_HIGH>; /* 0=command, 1=data */
+		eink-rst-gpios  = <&gpioc 14 GPIO_ACTIVE_HIGH>; /* active LOW in hw, driven raw */
+		eink-busy-gpios = <&gpioc 15 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>; /* LOW=busy, HIGH=idle; PULL_UP is a temporary diagnostic to check if BUSY is floating */
+	};
+};

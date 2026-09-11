@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+// Command sent from the Raspberry Pi to the STM32 over USB-CDC UART.
+//
+// Wire framing (not part of the .proto itself): each message on the wire is
+// preceded by its encoded length as an unsigned LEB128 varint (the same
+// encoding protobuf uses for varint fields). The STM32 firmware frames
+// messages the same way when decoding with nanopb:
+//
+//   [varint: message length][message length bytes: LedCommand]
+//
+// Must stay in sync with led-ctrl.proto in
+// raspberrypi/yocto/source/git_files/applications/led-ctrl.
+message LedCommand {
+  bool red_on   = 1;
+  bool green_on = 2;
+  bool blue_on  = 3;
+}

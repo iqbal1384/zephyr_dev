@@ -1,0 +1,60 @@
+# West manifest for zephyr_dev workspace.
+#
+# The zephyr_dev repository contains documentation, pc tools/applications,
+# scripts, todo, and zephyr applications (zephyr_app).
+#
+# Running `west update` pulls:
+#   zephyr/       <- upstream Zephyr RTOS
+#   bootloader/   <- mcuboot
+#   modules/      <- ST HALs, cmsis, and st_vl53l8cx driver module
+#
+# All non-ST microcontroller HALs are blocked via name-blocklist below.
+
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+    - name: github
+      url-base: git@github.com:iqbal1384
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: 3c36361caba41cb7fdf31b8b8ddae00f74fa0b62
+      import:
+        name-blocklist:
+          - hal_adi
+          - hal_afbr
+          - hal_ambiq
+          - hal_atmel
+          - hal_bouffalolab
+          - hal_espressif
+          - hal_ethos_u
+          - hal_gigadevice
+          - hal_infineon
+          - hal_intel
+          - hal_microchip
+          - hal_nordic
+          - hal_nuvoton
+          - hal_nxp
+          - hal_openisa
+          - hal_quicklogic
+          - hal_realtek
+          - hal_renesas
+          - hal_rpi_pico
+          - hal_sifli
+          - hal_silabs
+          - hal_tdk
+          - hal_telink
+          - hal_ti
+          - hal_wch
+          - hal_wurthelektronik
+          - hal_xtensa
+          - nrf_hw_models
+          - nrf_wifi
+
+    - name: st_vl53l8cx
+      remote: github
+      repo-path: st_vl53l8cx.git
+      path: modules/sensor/st_vl53l8cx
+      revision: main

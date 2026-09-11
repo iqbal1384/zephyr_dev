@@ -1,0 +1,36 @@
+/* boards/rgb.overlay for nucleo_l432kc */
+
+&gpioa {
+    status = "okay";
+};
+
+&gpiob {
+    status = "okay";
+};
+
+/ {
+    leds {
+        compatible = "gpio-leds";
+
+        rgb_red_led: red_led {
+            gpios = <&gpioa 11 GPIO_ACTIVE_HIGH>;  /* D10 */
+            label = "RGB_RED";
+        };
+
+        rgb_blue_led: blue_led {
+            gpios = <&gpiob 5 GPIO_ACTIVE_HIGH>;   /* D11 */
+            label = "RGB_BLUE";
+        };
+
+        rgb_green_led: green_led {
+            gpios = <&gpiob 4 GPIO_ACTIVE_HIGH>;   /* D12 */
+            label = "RGB_GREEN";
+        };
+    };
+
+    aliases {
+        rgb-red = &rgb_red_led;
+        rgb-blue = &rgb_blue_led;
+        rgb-green = &rgb_green_led;
+    };
+};

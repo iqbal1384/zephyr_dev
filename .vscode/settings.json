@@ -1,0 +1,8 @@
+{
+  "editor.fontFamily": "'Courier New', Courier, monospace",
+  "terminal.integrated.fontFamily": "'Courier New', Courier, monospace",
+  "chat.fontFamily": "'Courier New', Courier, monospace",
+  "chat.editor.fontFamily": "'Courier New', Courier, monospace",
+  "scm.inputFontFamily": "'Courier New', Courier, monospace",
+  "markdown.preview.fontFamily": "'Courier New', Courier, monospace"
+}

@@ -1,0 +1,56 @@
+/*
+ * Devicetree overlay for Nucleo-G474RE with ADI/Trinamic TMC5160-EVAL
+ * Tuned Smooth Profile for FUYU FSK30 Linear Actuator
+ */
+
+/ {
+	aliases {
+		stepper-driver = &tmc5160_driver;
+		stepper-ctrl = &tmc5160_ctrl;
+	};
+};
+
+&spi1 {
+	pinctrl-0 = <&spi1_sck_pa5 &spi1_miso_pa6 &spi1_mosi_pa7>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpiob 6 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+	status = "okay";
+
+	tmc5160: tmc5160@0 {
+		compatible = "adi,tmc51xx";
+		reg = <0>;
+		spi-max-frequency = <DT_FREQ_M(4)>;
+		clock-frequency = <DT_FREQ_M(12)>;
+
+		tmc5160_driver: stepper-driver {
+			compatible = "adi,tmc51xx-stepper-driver";
+			micro-step-res = <256>;
+			stallguard2-threshold = <12>;
+		};
+
+		tmc5160_ctrl: motion-controller {
+			compatible = "adi,tmc51xx-stepper-ctrl";
+			activate-stallguard2;
+			stallguard-threshold-velocity = <5000>;
+			stallguard-velocity-check-interval-ms = <50>;
+			/* Smooth Ramping Profile */
+			vstart = <10>;
+			vstop = <10>;
+			a1 = <2000>;
+			v1 = <30000>;
+			amax = <4000>;
+			vmax = <140000>;     /* ~33 mm/s cruising speed */
+			dmax = <4000>;
+			d1 = <2000>;
+			tzerowait = <200>;
+			thigh = <0>;
+			tcoolthrs = <1048575>;   /* 0xFFFFF: Enable StallGuard2 across entire speed range */
+			tpwmthrs = <0>;
+			tpowerdown = <10>;
+			/* Driving Torque */
+			ihold = <3>;
+			irun = <12>;
+			iholddelay = <6>;
+		};
+	};
+};

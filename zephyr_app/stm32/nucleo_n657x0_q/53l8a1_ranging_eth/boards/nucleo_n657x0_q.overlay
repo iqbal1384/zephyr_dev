@@ -1,0 +1,31 @@
+/* nucleo_n657x0_q overlay for VL53L8A1 ranging shield
+ *
+ * Pin mapping derived from F4 reference code (app_tof_pin_conf.h):
+ *   F4 PWR_EN = PA7 (Arduino D11) -> N6 D11 = PG2
+ *   F4 LPn    = PB0 (Arduino A3)  -> N6 A3  = PA12
+ *   I2C -> i2c1 (SCL=PH9 / D15, SDA=PC1 / D14)
+ *
+ * Sensor I2C address: 0x29 (7-bit form of 0x52).
+ */
+
+&i2c1 {
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
+	vl53l8a1: vl53l8a1@29 {
+		compatible = "i2c-device";
+		reg = <0x29>;
+		label = "VL53L8A1";
+	};
+};
+
+/* Disable SPI5 to free PG2 (Arduino D11 / PWR_EN = SPI5_MOSI) */
+&spi5 {
+	status = "disabled";
+};
+
+/ {
+	zephyr,user {
+		vl53l8a1-pwren-gpios = <&gpiog 2  GPIO_ACTIVE_HIGH>;
+		vl53l8a1-lpn-gpios   = <&gpioa 12 GPIO_ACTIVE_HIGH>;
+	};
+};

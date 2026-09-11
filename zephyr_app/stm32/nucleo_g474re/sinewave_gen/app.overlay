@@ -1,0 +1,24 @@
+/ {
+	zephyr,user {
+		dac = <&dac1>;
+		dac-channel-id = <1>;
+		dac-resolution = <12>;
+	};
+};
+
+&dac1 {
+	status = "okay";
+	pinctrl-0 = <&dac1_out1_pa4>;
+	pinctrl-names = "default";
+};
+
+/* TIM6: basic timer, no GPIO output, used only to pace DAC sample updates
+ * from an ISR so the sine period doesn't drift under console/USB IRQ load
+ * the way a busy-wait loop in the main thread does. */
+&timers6 {
+	status = "okay";
+
+	counter {
+		status = "okay";
+	};
+};

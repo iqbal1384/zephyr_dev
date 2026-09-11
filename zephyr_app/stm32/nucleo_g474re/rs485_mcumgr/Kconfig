@@ -1,0 +1,43 @@
+# Private config options for the rs485_mcumgr application.
+#
+# The two lines below just restore Zephyr's normal Kconfig tree (this file
+# replaces it as KCONFIG_ROOT purely so we can add APP_RS485_SMP_TRANSPORT
+# below) - same minimal pattern Zephyr's own sample apps use, e.g.
+# zephyr/samples/drivers/dac/Kconfig.
+
+mainmenu "RS485 mcumgr firmware update application"
+
+source "Kconfig.zephyr"
+
+config APP_RS485_SMP_TRANSPORT
+	bool "Custom RS485 mcumgr SMP transport"
+	default y
+	select MCUMGR_TRANSPORT_SERIAL_HAS_SMP_OVER_CONSOLE
+	help
+	  Compiles the shared SMP-over-serial encode/decode helpers
+	  (mcumgr_serial_tx_pkt/mcumgr_serial_process_frag) used by the custom
+	  RS485 transport in src/smp_rs485_transport.c, without pulling in
+	  CONFIG_MCUMGR_TRANSPORT_UART's built-in uart_mcumgr console driver
+	  (which has no hook for RS485 DE control).
+
+config APP_WDT_TIMEOUT_MS
+	int "IWDG timeout in milliseconds"
+	default 20000
+	help
+	  If a bad update hangs or crashes before the app reaches its main feed
+	  loop, IWDG resets the board; since the new image is never
+	  auto-confirmed in that case, MCUboot reverts to the last-known-good
+	  image on the next boot. 20000ms is an exact reload value for this
+	  chip's IWDG (LSI=32kHz, prescaler /256, reload 2499) with large
+	  margin below the ~32.768s hardware ceiling.
+
+config APP_SELF_CONFIRM_GRACE_PERIOD_S
+	int "Seconds of stable running before self-confirming an unconfirmed image"
+	default 300
+	help
+	  Safety-net fallback: if the Pi never explicitly sends `mcumgr image
+	  confirm`, the device confirms itself after this many seconds of
+	  continuous healthy operation, so it doesn't stay in a
+	  perpetually-revertible "test" state for its whole operational life.
+	  Keep this at least ~10-15x APP_WDT_TIMEOUT_MS so the two windows can
+	  never straddle ambiguously.

@@ -1,0 +1,55 @@
+/*
+ * Devicetree overlay for the MCUboot image only (sysbuild picks this up by
+ * filename convention).
+ *
+ * Unlike nucleo_g474re, this board's upstream .dts defines neither the flash
+ * partition table nor mcuboot-led0, so both have to be supplied here too
+ * (mirroring boards/nucleo_h723zg.overlay's partition table exactly - MCUboot
+ * needs the same flash map as the app to know its own image-slot bounds) -
+ * green_led is the board's "User LD1", the nearest equivalent of
+ * nucleo_g474re's DFU-indication LED.
+ *
+ * Deliberately does NOT set zephyr,code-partition here: MCUboot's own build
+ * already points that chosen at &boot_partition by itself (verified against
+ * nucleo_g474re/rs485_mcumgr's build, where CONFIG_FLASH_LOAD_OFFSET=0x0
+ * despite the board dts globally setting zephyr,code-partition to slot0).
+ * Setting it here to slot0_partition, as a first pass of this file did,
+ * silently overrides that default and links+flashes MCUboot itself at the
+ * app's slot0 address instead of address 0 - nothing ends up at the reset
+ * vector and the board just keeps running whatever was already there.
+ */
+
+/ {
+	aliases {
+		mcuboot-led0 = &green_led;
+	};
+};
+
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "mcuboot";
+			reg = <0x00000000 DT_SIZE_K(128)>;
+			read-only;
+		};
+
+		slot0_partition: partition@20000 {
+			label = "image-0";
+			reg = <0x00020000 DT_SIZE_K(256)>;
+		};
+
+		slot1_partition: partition@60000 {
+			label = "image-1";
+			reg = <0x00060000 DT_SIZE_K(384)>;
+		};
+
+		storage_partition: partition@c0000 {
+			label = "storage";
+			reg = <0x000c0000 DT_SIZE_K(256)>;
+		};
+	};
+};

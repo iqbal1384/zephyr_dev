@@ -1,0 +1,44 @@
+/* boards/nucleo_f401re.overlay */
+
+&gpiob {
+    status = "okay";
+};
+
+&gpioc {
+    status = "okay";
+};
+
+/ {
+    /* Common LED controller node */
+    leds {
+        compatible = "gpio-leds";
+
+        red_led: red_led {
+            gpios = <&gpioc 8 GPIO_ACTIVE_HIGH>;   /* PC8 */
+            label = "RGB_RED";
+        };
+
+        green1_led: green1_led {
+            gpios = <&gpioc 9 GPIO_ACTIVE_HIGH>;   /* PC9 */
+            label = "RGB_GREEN1";
+        };
+
+        green2_led: green2_led {
+            gpios = <&gpiob 8 GPIO_ACTIVE_HIGH>;   /* PB8 */
+            label = "RGB_GREEN2";
+        };
+
+        blue_led: blue_led {
+            gpios = <&gpioc 6 GPIO_ACTIVE_HIGH>;   /* PC6 */
+            label = "RGB_BLUE";
+        };
+    };
+
+    /* Optional: create aliases for simpler access in code */
+    aliases {
+        rgb-red    = &red_led;
+        rgb-green1 = &green1_led;
+        rgb-green2 = &green2_led;
+        rgb-blue   = &blue_led;
+    };
+};

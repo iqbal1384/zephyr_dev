@@ -1,0 +1,5 @@
+build/
+*curie*
+**/curie*
+stm32/curie4.0/
+stm32/curie_mini/

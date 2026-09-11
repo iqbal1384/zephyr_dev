@@ -1,0 +1,17 @@
+/* nucleo_f401re overlay for VL53L8A1 shield using st_vl53l8cx sensor driver */
+
+&i2c1 {
+	vl53l8cx: vl53l8cx@29 {
+		compatible = "st,vl53l8cx";
+		reg = <0x29>;
+		pwr-en-gpios = <&gpioa 7 GPIO_ACTIVE_HIGH>;   /* Arduino D11 */
+		lpn-gpios    = <&gpiob 0 GPIO_ACTIVE_HIGH>;   /* Arduino A3 */
+		resolution = <64>;                           /* 64 for 8x8, 16 for 4x4 */
+		ranging-frequency = <10>;                     /* 10 Hz */
+	};
+};
+
+/* Disable SPI1 to free PA7 (Arduino D11 / PWR_EN = SPI1_MOSI) */
+&spi1 {
+	status = "disabled";
+};

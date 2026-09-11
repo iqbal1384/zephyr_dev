@@ -1,0 +1,61 @@
+/*
+ * TMC5160A stepper driver node on the default Arduino-header SPI (spi1).
+ *
+ * Arduino header pin usage on this project:
+ *   D13 (PA5)  - SPI1 SCK   -> TMC5160 SCK
+ *   D12 (PA6)  - SPI1 MISO  -> TMC5160 SDO
+ *   D11 (PB5)  - SPI1 MOSI  -> TMC5160 SDI
+ *   D10 (PD14) - SPI1 CS    -> TMC5160 CSN   (cs-gpios already set on &spi1 by the board default DTS)
+ *   D9  (PD15) - GPIO       -> TMC5160 ENN (driver hardware enable, active high = enabled)
+ *
+ * Wiring not done yet at time of writing -- these are the pins to use. CLK
+ * (TMC5160 clock input) is left on its internal ~12MHz oscillator; tie it to
+ * GND, do not leave it floating. VREF/current-sense wiring, motor coil
+ * wiring, and the motor supply (VM) are outside the scope of this overlay --
+ * see README.md before applying power.
+ */
+
+&spi1 {
+	tmc5160: tmc5160@0 {
+		compatible = "adi,tmc51xx";
+		reg = <0>;
+		spi-max-frequency = <2000000>;
+		clock-frequency = <12000000>;
+
+		tmc5160_stepper_driver: stepper-driver {
+			compatible = "adi,tmc51xx-stepper-driver";
+			micro-step-res = <16>;
+			en-gpios = <&gpiod 15 GPIO_ACTIVE_HIGH>;
+		};
+
+		tmc5160_motion_controller: motion-controller {
+			compatible = "adi,tmc51xx-stepper-ctrl";
+
+			/* Conservative bring-up ramp; retune once a motor is wired up. */
+			vstart = <10>;
+			vstop = <10>;
+			a1 = <5000>;
+			v1 = <50000>;
+			amax = <5000>;
+			vmax = <200000>;
+			dmax = <5000>;
+			d1 = <5000>;
+			tzerowait = <100>;
+			tpowerdown = <10>;
+
+			/* Raw 0-31 current scale (31 = 32/32). Start low until sense
+			 * resistors / motor current rating are confirmed.
+			 */
+			ihold = <8>;
+			irun = <16>;
+			iholddelay = <5>;
+		};
+	};
+};
+
+/ {
+	aliases {
+		stepper-driver = &tmc5160_stepper_driver;
+		stepper-ctrl = &tmc5160_motion_controller;
+	};
+};

@@ -1,0 +1,90 @@
+/* nucleo_n657x0_q overlay for VL53L8A1 ranging shield — SPI variant
+ *
+ * *** HARDWARE CHANGE REQUIRED — READ BEFORE FLASHING ***
+ *
+ * The X-NUCLEO-53L8A1's combined SPI/I2C lines (MCLK_SCL / MOSI_SDA — see the
+ * board schematic, where these are literally the same wires as I2C SCL/SDA,
+ * switched by the sensor's SPI_I2C_N pin) run through the Arduino connector
+ * to D15/D14, which land on STM32N6 pins PH9/PC1. Those two pins have NO SPI
+ * alternate function on the STM32N657 (only I2C1/I3C1/UART/etc — checked
+ * against stm32n657x0hxq-pinctrl.dtsi), so the sensor cannot be driven over
+ * hardware SPI through the shield's Arduino header as wired.
+ *
+ * This overlay instead targets the board's native Arduino SPI bus
+ * (arduino_spi = spi5, pinctrl already wired to D10..D13):
+ *
+ *   Sensor signal   STM32N6 pin   Arduino pin   spi5 function
+ *   -------------   -----------   -----------   -------------
+ *   MCLK_SCL (SCK)  PE15          D13           spi5_sck_pe15
+ *   MOSI_SDA (MOSI) PG2           D11           spi5_mosi_pg2
+ *   MISO            PG1           D12           spi5_miso_pg1
+ *   NCS             PA3           D10           GPIO output (software CS, NOT spi5_nss_pa3)
+ *
+ * ==> Bypass the shield's Arduino-header SPI lines and run jumper wires
+ *     directly from the X-NUCLEO-53L8A1 satellite connector (or sensor
+ *     breakout) signals MCLK_SCL/MOSI_SDA/MISO/NCS to Nucleo pins
+ *     PE15/PG2/PG1/PA3 respectively.
+ * ==> Move the board's SPI_I2C_N jumper (J9, "one jumper for all devices")
+ *     to its SPI position — sensor pin SPI_I2C_N must be driven HIGH for
+ *     SPI mode (LOW = I2C mode). This is a physical board jumper, not
+ *     something firmware can toggle.
+ *
+ * PWR_EN was originally on PG2 (Arduino D11 / spi5_mosi_pg2) — that pin is
+ * now needed for MOSI, so PWR_EN is relocated here to PD7 (Arduino D9, free
+ * on this bus). Run a jumper wire from the shield's PWR_EN pin to PD7.
+ *
+ * LPn keeps its original assignment: PA12 (Arduino A3) — no conflict with spi5.
+ *
+ * NSS/CS pin note (critical):
+ * The st,stm32h7-spi driver disables the SPI peripheral (SPE=0) between
+ * scatter/gather buffer segments when in hardware-NSS-output mode. On STM32H7
+ * (and STM32N6 with the same SPI IP), SPE=0 releases hardware NSS → it goes
+ * HIGH between the 2-byte address segment and the data segment. The sensor
+ * sees two separate transactions and cannot reassemble them; all reads return
+ * 0x00 and all writes are silently discarded.
+ *
+ * Fix: use software CS (cs-gpios on the controller). The Zephyr STM32 SPI
+ * driver (spi_stm32.c, ~line 1458) switches hardware NSS to soft mode
+ * (SSM=1) automatically when cs-gpios is present — the SPI peripheral no
+ * longer drives PA3. Software CS is asserted once per spi_transceive_dt()
+ * call via spi_context_cs_control(), keeping NCS low across both segments.
+ *
+ * PA3 must therefore NOT be configured as spi5_nss_pa3 AF — it is a plain
+ * GPIO output. We override pinctrl-0 here to drop that AF pin.
+ */
+
+&spi5 {
+	status = "okay";
+	/* Drop spi5_nss_pa3: PA3 is a plain GPIO for software CS, not SPI AF. */
+	pinctrl-0 = <&spi5_sck_pe15 &spi5_miso_pg1 &spi5_mosi_pg2>;
+	pinctrl-names = "default";
+	/* PA3 (Arduino D10) as software chip-select (active-low). */
+	cs-gpios = <&gpioa 3 GPIO_ACTIVE_LOW>;
+
+	vl53l8a1: vl53l8a1@0 {
+		/* "spi-device" is not a real, matchable compatible in mainline
+		 * Zephyr (spi-device.yaml is a fields-only fragment meant to be
+		 * included by a vendor binding — unlike i2c-device.yaml, which
+		 * the I2C variant uses and which IS directly matchable). This
+		 * project ships its own minimal binding that just includes
+		 * spi-device.yaml — see dts/bindings/sensor/st,vl53l8a1-spi.yaml
+		 * (auto-discovered: DTS_ROOT always includes the app directory).
+		 */
+		compatible = "st,vl53l8a1-spi";
+		reg = <0>;
+		/* Placeholder — raise once the link is validated with a logic analyzer. */
+		spi-max-frequency = <2000000>;
+		/* SPI mode 0 (CPOL=0, CPHA=0) assumed: neither spi-cpol nor
+		 * spi-cpha is set below. Verify against the VL53L8CX SPI protocol. */
+		label = "VL53L8A1";
+	};
+};
+
+/* i2c1 is left at its default (disabled on this board) — this variant is SPI-only. */
+
+/ {
+	zephyr,user {
+		vl53l8a1-pwren-gpios = <&gpiod 7  GPIO_ACTIVE_HIGH>;
+		vl53l8a1-lpn-gpios   = <&gpioa 12 GPIO_ACTIVE_HIGH>;
+	};
+};

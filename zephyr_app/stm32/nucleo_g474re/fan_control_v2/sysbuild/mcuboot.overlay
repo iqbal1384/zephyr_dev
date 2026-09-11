@@ -1,0 +1,14 @@
+/*
+ * Devicetree overlay for the MCUboot image only (sysbuild picks this up by
+ * filename convention). The board's own .dts already provides mcuboot-led0
+ * (green user LED) for DFU indication; it only lacks the button alias that
+ * MCUboot's serial-recovery GPIO entrance code requires.
+ *
+ * Hold the User button (B1, PC13) at reset to enter serial recovery mode.
+ */
+
+/ {
+	aliases {
+		mcuboot-button0 = &user_button;
+	};
+};

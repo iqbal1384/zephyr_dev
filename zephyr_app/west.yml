@@ -1,0 +1,68 @@
+# West manifest for this workspace, with zephyr_app as the manifest
+# repository (west "T2" / app-is-manifest topology).
+#
+# This repo (zephyr_app) is the thing you clone. Everything else --
+# zephyr itself, its HAL/driver modules, mcuboot, etc. -- is pulled in
+# by `west update` as siblings of this directory:
+#
+#   zephyr_dev/
+#     zephyr_app/   <- this repo (west topdir's manifest repo)
+#     zephyr/       <- pulled by west, straight from zephyrproject-rtos
+#     bootloader/   <- pulled by west (mcuboot, via zephyr's own manifest)
+#     modules/      <- pulled by west (ST HALs, st_vl53l8cx, crypto, fs, etc.)
+#
+# All non-ST microcontroller HALs and vendor-specific peripheral modules are blocked
+# via name-blocklist below so west update only pulls STMicroelectronics HALs
+# (hal_st, hal_stm32, cmsis, cmsis_6, libmetal).
+
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+    - name: github
+      url-base: git@github.com:iqbal1384
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: 3c36361caba41cb7fdf31b8b8ddae00f74fa0b62
+      import:
+        name-blocklist:
+          - hal_adi
+          - hal_afbr
+          - hal_ambiq
+          - hal_atmel
+          - hal_bouffalolab
+          - hal_espressif
+          - hal_ethos_u
+          - hal_gigadevice
+          - hal_infineon
+          - hal_intel
+          - hal_microchip
+          - hal_nordic
+          - hal_nuvoton
+          - hal_nxp
+          - hal_openisa
+          - hal_quicklogic
+          - hal_realtek
+          - hal_renesas
+          - hal_rpi_pico
+          - hal_sifli
+          - hal_silabs
+          - hal_tdk
+          - hal_telink
+          - hal_ti
+          - hal_wch
+          - hal_wurthelektronik
+          - hal_xtensa
+          - nrf_hw_models
+          - nrf_wifi
+
+    - name: st_vl53l8cx
+      remote: github
+      repo-path: st_vl53l8cx.git
+      path: modules/sensor/st_vl53l8cx
+      revision: main
+
+  self:
+    path: zephyr_app

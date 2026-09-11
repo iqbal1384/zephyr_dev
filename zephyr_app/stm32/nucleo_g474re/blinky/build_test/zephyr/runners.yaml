@@ -1,0 +1,43 @@
+# Available runners configured by board.cmake.
+runners:
+- stm32cubeprogrammer
+- openocd
+- pyocd
+- jlink
+
+# Default flash runner if --runner is not given.
+flash-runner: stm32cubeprogrammer
+
+# Default debug runner if --runner is not given.
+debug-runner: openocd
+
+# Common runner configuration values.
+config:
+  board_dir: /home/user/work/zephyr_dev/zephyr/boards/st/nucleo_g474re
+  # Build outputs:
+  elf_file: zephyr.elf
+  hex_file: zephyr.hex
+  bin_file: zephyr.bin
+  # Host tools:
+  gdb: /opt/arm-gnu-toolchain-15.2.rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gdb
+  openocd: /usr/bin/openocd
+  openocd_search:
+
+# Runner specific arguments
+args:
+  stm32cubeprogrammer:
+    - --port=swd
+    - --reset-mode=hw
+  openocd:
+    - --cmd-load
+    - flash write_image erase
+    - --cmd-verify
+    - verify_image
+    - --cmd-erase=stm32l4x mass_erase 0
+  pyocd:
+    - --dt-flash=y
+    - --target=stm32g474retx
+  jlink:
+    - --dt-flash=y
+    - --device=STM32G474RE
+    - --speed=4000

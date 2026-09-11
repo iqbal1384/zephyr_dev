@@ -1,0 +1,58 @@
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * NUCLEO-H723ZG overlay for rs485_switch_hello.
+ *
+ * Pin assignments:
+ *   PD11 Morpho CN12 pin 43  INPUT  + rising-edge IRQ    Interrupt_O.1 from Curie PJ12
+ *   PE3  Morpho CN11 pin 48  OUTPUT                       Conn_1 enable → Curie PJ15
+ *   PG12 Arduino D7          OUTPUT                       RS-485 DE (shield)
+ *
+ * RS-485 data:
+ *   LPUART1 PB6=TX / PB7=RX  (Arduino D1/D0, already on board DTS).
+ *
+ * Console stays on USART3 (board default ST-Link VCP PD8/PD9).
+ *
+ * Wiring list:
+ *   Curie J15 pin 17  (SensorBus.O1 / PJ12)  ──▶  NUCLEO PD11 (CN12 pin 43)
+ *   NUCLEO PE3        (CN11 pin 48)          ──▶  Curie J15 pin 19 (SensorBus.C1 / PJ15)
+ *   GND common
+ *   RS-485 A/B from shield J1 ──▶ Waveshare port ttyACM0 (sniffer)
+ */
+
+/ {
+	switch_ctrl {
+		compatible = "gpio-leds";
+
+		/* PE3 (CN11 pin 48): drives Conn_1 on the rs485_switch board HIGH to enable
+		 * channel 1 (via Curie J15 pin 19 / SensorBus.C1 / PJ15). */
+		conn1_out: conn1_out {
+			gpios = <&gpioe 3 GPIO_ACTIVE_HIGH>;
+			label = "Conn_1 enable (PE3, CN11 pin 48)";
+		};
+
+		/* PG12: RS-485 Driver Enable for the shield's transceiver. */
+		rs485_de: rs485_de {
+			gpios = <&gpiog 12 GPIO_ACTIVE_HIGH>;
+			label = "RS-485 DE (PG12, Arduino D7)";
+		};
+	};
+
+	trigger_input {
+		compatible = "gpio-keys";
+
+		/* PD11 (CN12 pin 43): receives Interrupt_O.1 pulse from Curie PJ12.
+		 * Rising edge triggers the work item that sends the message. */
+		interrupt_o1_in: interrupt_o1_in {
+			gpios = <&gpiod 11 GPIO_ACTIVE_HIGH>;
+			label = "Interrupt_O.1 from Curie (PD11, CN12 pin 43)";
+			zephyr,code = <0>;
+		};
+	};
+
+	aliases {
+		conn1-out = &conn1_out;
+		rs485-de  = &rs485_de;
+		irq-in    = &interrupt_o1_in;
+	};
+};

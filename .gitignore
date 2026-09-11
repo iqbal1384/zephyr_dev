@@ -1,0 +1,20 @@
+# ==========================================
+# Confidential / Personal Projects (DO NOT COMMIT)
+# ==========================================
+*curie*
+**/curie4.0/**
+**/curie_mini/**
+zephyr_app/stm32/curie*
+
+# ==========================================
+# West Managed Repositories & Build Output
+# ==========================================
+/zephyr/
+/bootloader/
+/modules/
+/build/
+/.west/
+/.venv/
+/.claude/
+/zephyr_git_vendor_squashed_backup/
+

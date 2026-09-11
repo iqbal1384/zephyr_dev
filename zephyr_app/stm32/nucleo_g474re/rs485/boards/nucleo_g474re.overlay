@@ -1,0 +1,10 @@
+/ {
+    rs485_ctrl: rs485_ctrl {
+        compatible = "gpio-leds";
+
+        rs485_de: rs485_de {
+            gpios = <&gpioa 8 GPIO_ACTIVE_HIGH>;
+            label = "RS485_DE_RE";
+        };
+    };
+};
