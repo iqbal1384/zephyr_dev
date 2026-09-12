@@ -1,19 +1,14 @@
-# West manifest for this workspace, with zephyr_app as the manifest
-# repository (west "T2" / app-is-manifest topology).
+# West manifest for zephyr_dev workspace.
 #
-# This repo (zephyr_app) is the thing you clone. Everything else --
-# zephyr itself, its HAL/driver modules, mcuboot, etc. -- is pulled in
-# by `west update` as siblings of this directory:
+# The zephyr_dev repository contains documentation, pc tools/applications,
+# scripts, todo, and zephyr applications (zephyr_app).
 #
-#   zephyr_dev/
-#     zephyr_app/   <- this repo (west topdir's manifest repo)
-#     zephyr/       <- pulled by west, straight from zephyrproject-rtos
-#     bootloader/   <- pulled by west (mcuboot, via zephyr's own manifest)
-#     modules/      <- pulled by west (ST HALs, st_vl53l8cx, crypto, fs, etc.)
+# Running `west update` pulls:
+#   zephyr/       <- upstream Zephyr RTOS
+#   bootloader/   <- mcuboot
+#   modules/      <- ST HALs, cmsis, and st_vl53l8cx driver module
 #
-# All non-ST microcontroller HALs and vendor-specific peripheral modules are blocked
-# via name-blocklist below so west update only pulls STMicroelectronics HALs
-# (hal_st, hal_stm32, cmsis, cmsis_6, libmetal).
+# All non-ST microcontroller HALs are blocked via name-blocklist below.
 
 manifest:
   remotes:

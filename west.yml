@@ -58,3 +58,6 @@ manifest:
       repo-path: st_vl53l8cx.git
       path: modules/sensor/st_vl53l8cx
       revision: main
+
+  self:
+    path: zephyr_app
