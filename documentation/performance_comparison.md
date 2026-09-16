@@ -96,3 +96,4 @@ Total Bus Transmission Time (I2C @ 400 kHz Fast-Mode): ~740 ms
      - Linaro & ST engineering benchmarks showing event-driven RTOS drivers free >95% of CPU cycles during communication compared to blocking HAL functions.
 3. **Hardware Target Verification**:
    - Tested and verified on **NUCLEO-F401RE** (STM32F401xE @ 84 MHz) with **X-NUCLEO-53L8A1** shield.
+
